@@ -14,9 +14,6 @@ import os,sys,cv2,random,datetime,time,math
 import argparse
 import numpy as np
 
-from SFD_pytorch.net_s3fd import s3fd
-from SFD_pytorch.bbox import *
-
 def load_image(image_path, grayscale=False, target_size=None):
     pil_image = image.load_img(image_path, grayscale, target_size)
     return image.img_to_array(pil_image)

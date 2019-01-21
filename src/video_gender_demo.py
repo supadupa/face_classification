@@ -9,12 +9,11 @@ from utils.inference import detect_faces
 from utils.inference import draw_text
 from utils.inference import draw_bounding_box
 from utils.inference import apply_offsets
-from utils.inference import load_detection_model, load_s3fd_model, detect_faces_sfd
+from utils.inference import load_detection_model 
 from utils.preprocessor import preprocess_input
 
 # parameters for loading data and images
 detection_model_path = '../trained_models/detection_models/haarcascade_frontalface_default.xml'
-sfd_model_path = './SFD_pytorch/s3fd_convert.pth'
 gender_model_path = '../trained_models/gender_models/simple_CNN.81-0.96.hdf5'
 gender_labels = get_labels('imdb')
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -24,8 +23,7 @@ frame_window = 10
 gender_offsets = (30, 60)
 
 # loading models
-# face_detection = load_detection_model(detection_model_path)
-face_detection = load_s3fd_model(sfd_model_path)
+face_detection = load_detection_model(detection_model_path)
 gender_classifier = load_model(gender_model_path, compile=False)
 
 # getting input model shapes for inference
@@ -54,7 +52,7 @@ def classify_frame(bgr_image):
 
     rgb_image = cv2.resize(rgb, (new_width, new_height))
 
-    faces = detect_faces_sfd(face_detection, rgb_image)
+    faces = detect_faces(face_detection, rgb_image)
 
     for face_coordinates in faces:
 
