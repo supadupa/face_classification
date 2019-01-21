@@ -18,7 +18,7 @@ from utils.datasets import get_class_to_arg
 # getting the correct model given the input
 # task = sys.argv[1]
 # class_name = sys.argv[2]
-task = 'emotion'
+task = 'gender'
 if task == 'gender':
     model_filename = '../trained_models/gender_models/gender_mini_XCEPTION.21-0.95.hdf5'
     class_to_arg = get_class_to_arg('imdb')
@@ -33,7 +33,9 @@ elif task == 'emotion':
     predicted_class = 0
     offsets = (0, 0)
 
+print(model_filename)
 model = load_model(model_filename, compile=False)
+
 gradient_function = compile_gradient_function(model, predicted_class, 'conv2d_7')
 register_gradient()
 guided_model = modify_backprop(model, 'GuidedBackProp', task)
@@ -63,6 +65,7 @@ while True:
 
         x1, x2, y1, y2 = apply_offsets(face_coordinates, offsets)
         gray_face = gray_image[y1:y2, x1:x2]
+        rgb_face = rgb_image[y1:y2, x1:x2]
         try:
             gray_face = cv2.resize(gray_face, (target_size))
         except:
@@ -71,6 +74,11 @@ while True:
         gray_face = preprocess_input(gray_face, True)
         gray_face = np.expand_dims(gray_face, 0)
         gray_face = np.expand_dims(gray_face, -1)
+
+        gender_prediction = model.predict(rgb_face)
+        gender_label_arg = np.argmax(gender_prediction)
+        gender_text = gender_labels[gender_label_arg]
+
         guided_gradCAM = calculate_guided_gradient_CAM(gray_face,
                             gradient_function, saliency_function)
         guided_gradCAM = cv2.resize(guided_gradCAM, (x2-x1, y2-y1))
@@ -81,6 +89,7 @@ while True:
         except:
             continue
         draw_bounding_box((x1, y1, x2 - x1, y2 - y1), rgb_image, color)
+        draw_text((x1,y1,x2-x1,y2-y1), rgb_image, color, 0, -20, 1, 1)
     bgr_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
     try:
         cv2.imshow('window_frame', bgr_image)
